@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Guestbook API</title>
+  </head>
+  <body>
+    <header>
+      <h1>Guestbook API</h1>
+      <h2>RESTful JSON API</h2>
+    </header>
+    <main>
+      <section>
+        <h3>Retrieve all signatures</h3>
+        <p><code>GET /signatures</code></p>
+      </section>
+      <section>
+        <h3>Create a signature</h3>
+        <p><code>POST /signatures</code></p>
+      </section>
+      <section>
+        <h3>Retrieve a specific signature</h3>
+        <p><code>GET /signatures/{id}</code></p>
+      </section>
+      <section>
+        <h3>Update a specific signature</h3>
+        <p><code>PATCH /signatures/{id}</code></p>
+        <p>Attaching a JSON body with the possible below fields:</p>
+        <ul>
+          <li><code>title</code> (string)</li>
+          <li><code>message</code> (string)</li>
+        </ul>
+      </section>
+      <section>
+        <h3>Delete a specific signature</h3>
+        <p><code>DELETE /signatures/{id}</code></p>
+      </section>
+    </main>
+  </body>
+</html>
