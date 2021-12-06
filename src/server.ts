@@ -13,7 +13,7 @@ import filePath from "./filePath";
 
 // loading in some dummy signatures into the database
 // (comment out if desired, or change the number)
-addDummyGuestbookSignatures(20);
+// addDummyGuestbookSignatures(0);
 
 const app = express();
 /** Parses JSON data in a request automatically */
@@ -32,8 +32,8 @@ app.get("/", (req, res) => {
 });
 
 // GET /signatures
-app.get("/signatures", (req, res) => {
-  const allSignatures = getAllGuestbookSignatures();
+app.get("/signatures", async (req, res) => {
+  const allSignatures = await getAllGuestbookSignatures();
   res.status(200).json(allSignatures);
 });
 

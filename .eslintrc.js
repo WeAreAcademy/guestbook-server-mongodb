@@ -20,5 +20,6 @@ module.exports = {
         },
       },
     ],
+    "@typescript-eslint/ban-ts-comment": 0,
   },
 };

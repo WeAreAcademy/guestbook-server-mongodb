@@ -1,4 +1,9 @@
 import faker from "faker";
+import { MongoClient, ObjectId } from "mongodb";
+import dotenv from "dotenv";
+import { GuestbookSignature } from "./db";
+
+dotenv.config();
 
 export interface GuestbookSignature {
   name: string;
@@ -6,13 +11,24 @@ export interface GuestbookSignature {
 }
 
 export interface GuestbookSignatureWithId extends GuestbookSignature {
-  id: number;
+  _id: ObjectId;
 }
 
-const db: GuestbookSignatureWithId[] = [];
+// Connection URI
+const uri = process.env.DATABASE_URL;
 
-/** Variable to keep incrementing id of guestbook signatures */
-let idCounter = 0;
+if (!uri)
+  throw new Error(
+    "No database URL specified in environment variables. Have you set up a .env file?"
+  );
+
+// Create a new MongoClient
+const client = new MongoClient(uri);
+client.connect();
+
+const db = client
+  .db("guestbook-signature")
+  .collection<GuestbookSignature>("signatures");
 
 /**
  * Adds in some dummy guestbook signatures to the database
@@ -20,12 +36,12 @@ let idCounter = 0;
  * @param n - the number of signatures to generate
  * @returns the created signatures
  */
-export const addDummyGuestbookSignatures = (
+export const addDummyGuestbookSignatures = async (
   n: number
-): GuestbookSignatureWithId[] => {
+): Promise<GuestbookSignatureWithId[]> => {
   const createdSignatures: GuestbookSignatureWithId[] = [];
   for (let count = 0; count < n; count++) {
-    const createdSignature = addGuestbookSignature({
+    const createdSignature = await addGuestbookSignature({
       name: faker.name.findName(), // random fake name
       message: faker.lorem.sentences(3), // random fake message
     });
@@ -40,15 +56,17 @@ export const addDummyGuestbookSignatures = (
  * @param data - the signature data to insert in
  * @returns the signature added (with a newly created id)
  */
-export const addGuestbookSignature = (
+export const addGuestbookSignature = async (
   data: GuestbookSignature
-): GuestbookSignatureWithId => {
-  const newEntry: GuestbookSignatureWithId = {
-    id: ++idCounter,
+): Promise<GuestbookSignatureWithId> => {
+  const newEntry: GuestbookSignature = {
     ...data,
   };
-  db.push(newEntry);
+  const res = await db.insertOne(newEntry);
+  // TODO: pick up from here - getting back the inserted signature
+  // @ts-ignore
   return newEntry;
+  // return res.;
 };
 
 /**
@@ -94,8 +112,14 @@ const findIndexOfGuestbookSignatureById = (
  * Find all guestbook signatures
  * @returns all guestbook signatures from the database
  */
-export const getAllGuestbookSignatures = (): GuestbookSignatureWithId[] => {
-  return db;
+export const getAllGuestbookSignatures = async (): Promise<
+  GuestbookSignatureWithId[]
+> => {
+  const res = await client
+    .db("guestbook-server")
+    .collection("signatures")
+    .find();
+  return res.toArray();
 };
 
 /**
