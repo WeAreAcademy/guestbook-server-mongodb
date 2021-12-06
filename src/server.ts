@@ -1,7 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
 import {
-  addDummyGuestbookSignatures,
   addGuestbookSignature,
   deleteGuestbookSignatureById,
   getAllGuestbookSignatures,
@@ -10,10 +9,6 @@ import {
   updateGuestbookSignatureById,
 } from "./db";
 import filePath from "./filePath";
-
-// loading in some dummy signatures into the database
-// (comment out if desired, or change the number)
-// addDummyGuestbookSignatures(0);
 
 const app = express();
 /** Parses JSON data in a request automatically */
@@ -38,17 +33,17 @@ app.get("/signatures", async (req, res) => {
 });
 
 // POST /signatures
-app.post<{}, {}, GuestbookSignature>("/signatures", (req, res) => {
+app.post<{}, {}, GuestbookSignature>("/signatures", async (req, res) => {
   // to be rigorous, ought to handle non-conforming request bodies
   // ... but omitting this as a simplification
   const postData = req.body;
-  const createdSignature = addGuestbookSignature(postData);
+  const createdSignature = await addGuestbookSignature(postData);
   res.status(201).json(createdSignature);
 });
 
 // GET /signatures/:id
-app.get<{ id: string }>("/signatures/:id", (req, res) => {
-  const matchingSignature = getGuestbookSignatureById(parseInt(req.params.id));
+app.get<{ id: string }>("/signatures/:id", async (req, res) => {
+  const matchingSignature = await getGuestbookSignatureById(req.params.id);
   if (matchingSignature === "not found") {
     res.status(404).json(matchingSignature);
   } else {
@@ -57,10 +52,8 @@ app.get<{ id: string }>("/signatures/:id", (req, res) => {
 });
 
 // DELETE /signatures/:id
-app.delete<{ id: string }>("/signatures/:id", (req, res) => {
-  const matchingSignature = deleteGuestbookSignatureById(
-    parseInt(req.params.id)
-  );
+app.delete<{ id: string }>("/signatures/:id", async (req, res) => {
+  const matchingSignature = await deleteGuestbookSignatureById(req.params.id);
   if (matchingSignature === "not found") {
     res.status(404).json(matchingSignature);
   } else {
@@ -71,9 +64,9 @@ app.delete<{ id: string }>("/signatures/:id", (req, res) => {
 // PATCH /signatures/:id
 app.patch<{ id: string }, {}, Partial<GuestbookSignature>>(
   "/signatures/:id",
-  (req, res) => {
-    const matchingSignature = updateGuestbookSignatureById(
-      parseInt(req.params.id),
+  async (req, res) => {
+    const matchingSignature = await updateGuestbookSignatureById(
+      req.params.id,
       req.body
     );
     if (matchingSignature === "not found") {
